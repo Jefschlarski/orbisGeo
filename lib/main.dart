@@ -4,7 +4,6 @@ import 'styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:camera/camera.dart';
 
 void main() => runApp(MyApp());
@@ -70,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchPermissionStatus();
 
     availableCameras().then((cameras) {
       _cameras = cameras;
@@ -218,16 +216,12 @@ class _HomeScreenState extends State<HomeScreen> {
             : null,
       ),
       body: Builder(builder: (context) {
-        if (_hasPermissions) {
-          return _isCameraOpen
-              ? _buildCameraScreen()
-              : HomePage(
-                  onOpenCamera: _openCamera,
-                  onViewHistory: _viewPhotoHistory,
-                );
-        } else {
-          return _buildPermissionSheet();
-        }
+        return _isCameraOpen
+            ? _buildCameraScreen()
+            : HomePage(
+                onOpenCamera: _openCamera,
+                onViewHistory: _viewPhotoHistory,
+              );
       }),
     );
   }
@@ -290,44 +284,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 // Exibe detalhes de permissões ao abrir o app pela primeira vez
-
-  Widget _buildPermissionSheet() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text('Requer permissões locais'),
-          ElevatedButton(
-            child: Text('Permissões'),
-            style: CustomStyles.defaultButtonStyle,
-            onPressed: () {
-              Permission.locationWhenInUse.request().then((ignored) {
-                _fetchPermissionStatus();
-              });
-            },
-          ),
-          SizedBox(height: 16),
-          ElevatedButton(
-            child: Text('Configurações'),
-            style: CustomStyles.defaultButtonStyle,
-            onPressed: () {
-              openAppSettings().then((opened) {
-                //
-              });
-            },
-          )
-        ],
-      ),
-    );
-  }
-
-  void _fetchPermissionStatus() {
-    Permission.locationWhenInUse.status.then((status) {
-      if (mounted) {
-        setState(() => _hasPermissions = status == PermissionStatus.granted);
-      }
-    });
-  }
 }
 
 // Home Page
